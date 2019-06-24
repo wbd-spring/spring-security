@@ -28,4 +28,12 @@ public class LoginController {
 	public String printAdmin() {
 		return "角色为role_admin";
 	}
+	
+	@RequestMapping("/user")
+	@ResponseBody
+	@PreAuthorize("hasRole('ROLE_USER')")
+	public String printUser() {
+		
+		return "角色为role_user";
+	}
 }
