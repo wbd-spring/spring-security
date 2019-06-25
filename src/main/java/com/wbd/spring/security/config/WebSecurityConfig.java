@@ -27,6 +27,15 @@ import com.wbd.spring.security.service.impl.CustomUserDetailsService;
  * 开启全局 Securtiy 注解。
 
 
+使用过滤器就已经实现了验证码功能，但其实它和 AJAX 验证差别不大。
+
+1.AJAX 是在提交前发一个请求，请求返回成功就提交，否则不提交；
+
+2.过滤器是先验证验证码，验证成功就让 Spring Security 验证用户名和密码；验证失败，则产生异常·。
+
+如果我们要做的需求是用户登录是需要多个验证字段，不单单是用户名和密码，那么使用过滤器会让逻辑变得复杂，这时候可以考虑自定义 Spring Security 的验证逻辑了…
+
+
  * @author zgh
  *
  */
