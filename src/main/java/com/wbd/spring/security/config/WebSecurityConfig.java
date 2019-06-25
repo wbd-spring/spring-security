@@ -1,5 +1,7 @@
 package com.wbd.spring.security.config;
 
+import javax.sql.DataSource;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,7 +13,11 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
+import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 
+import com.wbd.spring.security.filter.VerifyCodeFilter;
 import com.wbd.spring.security.service.impl.CustomUserDetailsService;
 
 /**
@@ -30,6 +36,21 @@ import com.wbd.spring.security.service.impl.CustomUserDetailsService;
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
     @Autowired
 	private CustomUserDetailsService userDetailsService;
+    
+    @Autowired
+    private DataSource dataSource;
+    
+    
+    @Bean
+    public PersistentTokenRepository persistentTokenRepository() {
+    	
+    	JdbcTokenRepositoryImpl jtri = new JdbcTokenRepositoryImpl();
+    	jtri.setDataSource(dataSource);
+    	// 如果token表不存在，使用下面语句可以初始化该表；若存在，请注释掉这条语句，否则会报错。
+    	//jtri.setCreateTableOnStartup(true)
+    	return jtri;
+    }
+    
     
     /**
 	 * 全局用户信息<br>
@@ -73,7 +94,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
 	 * @throws Exception
 	 *             认证异常信息
 	 */
-
+    @Bean
 	@Override
 	public AuthenticationManager authenticationManagerBean() throws Exception {
 		return super.authenticationManagerBean();
@@ -91,16 +112,33 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
     @Override
     protected void configure(HttpSecurity http) throws Exception {
     	
-    	http.authorizeRequests().anyRequest().authenticated()
+    	http.authorizeRequests()
+    	.antMatchers("/getVerifyCode").permitAll() //对验证码的请求进行放行
+    	.anyRequest().authenticated()
+    	
     	//设置登录页
     	.and().formLogin().loginPage("/login")
     	//设置登录成功页
-    	.defaultSuccessUrl("/").permitAll()
-    	.and().logout().permitAll();
+    	.defaultSuccessUrl("/").permitAll()//对登录成功之后调整到主页请求进行放行
+    	.failureUrl("/login/error")
+    	//添加一个addFilterBefore()，有两个参数， 在执行参数二之前先执行参数一， 
+    	//spring security对于用户名密码登录方式通过UsernamePasswordAuthenticationFilter处理的
+    	//我们在它之前执行验证码过滤器即可
+    	.and().addFilterBefore(new VerifyCodeFilter(), UsernamePasswordAuthenticationFilter.class) 
+    	.logout().permitAll()//对退出请求进行放行
+    	.and().rememberMe()
+    	.tokenRepository(persistentTokenRepository())
+    	//设置有效期
+    	.tokenValiditySeconds(60)
+    	.userDetailsService(userDetailsService);
+    	
+    	
     	
     	//关闭csrf跨域
     	///关闭打开的csrf保护
     	http.csrf().disable();
     	
     }
+    
+    
 }
