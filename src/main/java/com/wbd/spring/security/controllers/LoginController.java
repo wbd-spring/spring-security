@@ -28,13 +28,13 @@ public class LoginController {
 		return "login.html";
 	}
 	
-	@RequestMapping("/admin")
-	@ResponseBody
-	@PreAuthorize("hasRole('ROLE_ADMIN')")
-	public String printAdmin() {
-		return "角色为role_admin";
-	}
-	
+//	@RequestMapping("/admin")
+//	@ResponseBody
+//	@PreAuthorize("hasRole('ROLE_ADMIN')")
+//	public String printAdmin() {
+//		return "角色为role_admin";
+//	}
+//	
 	@RequestMapping("/user")
 	@ResponseBody
 	@PreAuthorize("hasRole('ROLE_USER')")
@@ -57,4 +57,24 @@ public class LoginController {
 		e.printStackTrace();
 	}
 	}
+	
+	
+	@RequestMapping("/admin")
+	@ResponseBody
+	@PreAuthorize("hasPermission('/admin','r')")
+	public String printAdminA() {
+		
+		return "有权限访问/admin路径下的r权限";
+	}
+	
+	
+	@RequestMapping("/admin/c")
+	@ResponseBody
+	@PreAuthorize("hasPermission('/admin','c')")
+	public String printAdminB() {
+		
+		return "有权限访问/admin路径下的c权限";
+	}
+	
+	
 }

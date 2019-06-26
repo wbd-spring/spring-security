@@ -13,10 +13,12 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 
+import com.wbd.spring.security.evaluators.CustomPermissionEvaluator;
 import com.wbd.spring.security.filter.VerifyCodeFilter;
 import com.wbd.spring.security.service.impl.CustomUserDetailsService;
 
@@ -149,5 +151,17 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
     	
     }
     
+    
+    /**
+     * 注册自定义的PermissionEvaluator
+     */
+    
+    @Bean
+    public DefaultWebSecurityExpressionHandler webSecurityExpression() {
+    	
+    	DefaultWebSecurityExpressionHandler handler = new DefaultWebSecurityExpressionHandler();
+    	handler.setPermissionEvaluator(new CustomPermissionEvaluator());
+    	return handler;
+    }
     
 }

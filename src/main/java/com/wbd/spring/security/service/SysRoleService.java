@@ -4,4 +4,6 @@ import com.wbd.spring.security.dto.SysRole;
 
 public interface SysRoleService {
 	 public SysRole selectById(Integer id);
+	 
+	public SysRole selectByName(String name);
 }
