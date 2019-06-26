@@ -55,7 +55,8 @@ public class CustomPermissionEvaluator implements PermissionEvaluator{
 		
 	List p2 = 	p.getPermissions();
 	//如果访问的url和权限用户符合，返回true
-	
+	System.out.println(targetDomainObject+"=======aaaaaaaaaaaaa");
+	System.out.println(permission+"======bbbbbbbbbbbb");
 	if(targetDomainObject.equals(p.getUrl())&&p2.contains(permission)) {
 		return true;
 	}
