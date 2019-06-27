@@ -20,6 +20,10 @@ import org.springframework.security.web.authentication.rememberme.PersistentToke
 
 import com.wbd.spring.security.evaluators.CustomPermissionEvaluator;
 import com.wbd.spring.security.filter.VerifyCodeFilter;
+import com.wbd.spring.security.handler.CustomAuthenticationFailureHandler;
+import com.wbd.spring.security.handler.CustomAuthenticationSuccessHandler;
+import com.wbd.spring.security.handler.CustomExpiredSessionStrategy;
+import com.wbd.spring.security.handler.CustomLogoutSuccessHandler;
 import com.wbd.spring.security.service.impl.CustomUserDetailsService;
 
 /**
@@ -51,6 +55,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
     @Autowired
     private DataSource dataSource;
     
+    @Autowired
+    private CustomAuthenticationFailureHandler cfh;
+    
+    @Autowired
+    private CustomAuthenticationSuccessHandler cash;
+    
+    @Autowired
+    private CustomLogoutSuccessHandler  csh;
     
     @Bean
     public PersistentTokenRepository persistentTokenRepository() {
@@ -122,27 +134,46 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
     //对http请求的过滤配置
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-    	
     	http.authorizeRequests()
-    	.antMatchers("/getVerifyCode").permitAll() //对验证码的请求进行放行
+    	.antMatchers("/getVerifyCode","/login","/login/invalid","/signout").permitAll() //对验证码 登录页面的请求进行放行
     	.anyRequest().authenticated()
     	
     	//设置登录页
     	.and().formLogin().loginPage("/login")
+    	
+    	/**
+    	 * 1.首先将 customAuthenticationSuccessHandler 和 customAuthenticationFailureHandler注入进来
+           2.配置 successHandler() 和 failureHandler()
+           3.注释 failureUrl() 和 defaultSuccessUrl()
+ 
+    	 */
+    	.successHandler(cash)
+    	.failureHandler(cfh)
+    	
     	//设置登录成功页
-    	.defaultSuccessUrl("/").permitAll()//对登录成功之后调整到主页请求进行放行
-    	.failureUrl("/login/error")
+    	//.defaultSuccessUrl("/").permitAll()//对登录成功之后调整到主页请求进行放行
+    	//.failureUrl("/login/error")
     	//添加一个addFilterBefore()，有两个参数， 在执行参数二之前先执行参数一， 
     	//spring security对于用户名密码登录方式通过UsernamePasswordAuthenticationFilter处理的
     	//我们在它之前执行验证码过滤器即可
     	.and().addFilterBefore(new VerifyCodeFilter(), UsernamePasswordAuthenticationFilter.class) 
-    	.logout().permitAll()//对退出请求进行放行
+    	.logout().logoutUrl("/signout").deleteCookies("JSESSIONID").logoutSuccessHandler(csh)
     	.and().rememberMe()
     	.tokenRepository(persistentTokenRepository())
     	//设置有效期
     	.tokenValiditySeconds(60)
-    	.userDetailsService(userDetailsService);
-    	
+    	.userDetailsService(userDetailsService)
+    	.and().sessionManagement().invalidSessionUrl("/login/invalid")
+    	/**
+    	 * maximumSessions(int)：指定最大登录数
+     maxSessionsPreventsLogin(boolean)：是否保留已经登录的用户；为true，新用户无法登录；为 false，旧用户被踢出
+    expiredSessionStrategy(SessionInformationExpiredStrategy)：旧用户被踢出后处理方法
+    maxSessionsPreventsLogin()可能不太好理解，这里我们先设为 false，效果和 QQ 登录是一样的，登陆后之前登录的账户被踢出。
+
+    	 */
+    	.maximumSessions(2)
+    	.maxSessionsPreventsLogin(true)
+    	.expiredSessionStrategy(new CustomExpiredSessionStrategy());
     	
     	
     	//关闭csrf跨域

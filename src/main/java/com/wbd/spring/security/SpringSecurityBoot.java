@@ -4,10 +4,12 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisHttpSession;
 
 import com.wbd.spring.security.servlets.VerifyServlet;
 
 @SpringBootApplication
+@EnableRedisHttpSession //开启利用redis存储共享的session
 public class SpringSecurityBoot {
 
 	public static void main(String[] args) {

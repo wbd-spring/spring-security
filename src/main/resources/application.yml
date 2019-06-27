@@ -6,8 +6,17 @@ spring:
     driver-class-name: com.mysql.jdbc.Driver
     username: root
     password: 123456
+  redis:
+    host: 118.190.71.215
+    port: 6379
+  session:
+    store-type: redis ##session共享采用redis来存储 
+    
 server:
   port: 8080
+  servlet:
+    session:
+      timeout: 65  # session 过期时间，单位：秒
 mybatis: #开启Mybatis下划线命名转驼峰命名
   configuration:
     map-underscore-to-camel-case: true

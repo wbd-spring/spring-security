@@ -5,20 +5,25 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 @Controller
 public class LoginController {
-
+	private Logger logger = LoggerFactory.getLogger(LoginController.class);
 	@RequestMapping("/")
 	public String showHome() {
 		//通过spring security获取当前用户信息
 		String name = SecurityContextHolder.getContext().getAuthentication().getName();
+		logger.info("当前登陆用户：" + name);
 		return "home.html";
 	}
 
@@ -74,6 +79,13 @@ public class LoginController {
 	public String printAdminB() {
 		
 		return "有权限访问/admin路径下的c权限";
+	}
+	
+	@RequestMapping("/login/invalid")
+	@ResponseStatus(HttpStatus.UNAUTHORIZED)
+	@ResponseBody
+	public String invalid() {
+	    return "Session 已过期，请重新登录";
 	}
 	
 	
