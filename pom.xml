@@ -59,6 +59,13 @@
 			<artifactId>mysql-connector-java</artifactId>
 		</dependency>
 
+		<!-- jwt -->
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt</artifactId>
+			<version>0.9.0</version>
+		</dependency>
+
 	</dependencies>
 
 

@@ -135,7 +135,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
     @Override
     protected void configure(HttpSecurity http) throws Exception {
     	http.authorizeRequests()
-    	.antMatchers("/getVerifyCode","/login","/login/invalid","/signout").permitAll() //对验证码 登录页面的请求进行放行
+    	.antMatchers("/getVerifyCode","/login","/login/invalid","/signout","/api/*","/test/login").permitAll() //对验证码 登录页面的请求进行放行
     	.anyRequest().authenticated()
     	
     	//设置登录页
