@@ -15,6 +15,12 @@
 
 	<dependencies>
 
+<!-- 自定义注解，结合spring aop技术来实现日志记录功能 -->
+<dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>

@@ -19,6 +19,8 @@ import org.springframework.security.web.authentication.rememberme.JdbcTokenRepos
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 
 import com.wbd.spring.security.evaluators.CustomPermissionEvaluator;
+import com.wbd.spring.security.filter.JwtLoginFilter;
+import com.wbd.spring.security.filter.JwtTokenAuthenticationFilter;
 import com.wbd.spring.security.filter.VerifyCodeFilter;
 import com.wbd.spring.security.handler.CustomAuthenticationFailureHandler;
 import com.wbd.spring.security.handler.CustomAuthenticationSuccessHandler;
@@ -135,11 +137,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
     @Override
     protected void configure(HttpSecurity http) throws Exception {
     	http.authorizeRequests()
-    	.antMatchers("/getVerifyCode","/login","/login/invalid","/signout","/api/*","/test/login").permitAll() //对验证码 登录页面的请求进行放行
+    	.antMatchers("/getVerifyCode","/login","/login/invalid","/signout","/api/*","/test/login","/login/error","/test/annotation").permitAll() //对验证码 登录页面的请求进行放行
+    	
     	.anyRequest().authenticated()
     	
     	//设置登录页
     	.and().formLogin().loginPage("/login")
+    	
     	
     	/**
     	 * 1.首先将 customAuthenticationSuccessHandler 和 customAuthenticationFailureHandler注入进来
@@ -157,6 +161,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
     	//spring security对于用户名密码登录方式通过UsernamePasswordAuthenticationFilter处理的
     	//我们在它之前执行验证码过滤器即可
     	.and().addFilterBefore(new VerifyCodeFilter(), UsernamePasswordAuthenticationFilter.class) 
+    	//.addFilter(new JwtLoginFilter(authenticationManager()))
+    	//.addFilter(new JwtTokenAuthenticationFilter(authenticationManager()))
     	.logout().logoutUrl("/signout").deleteCookies("JSESSIONID").logoutSuccessHandler(csh)
     	.and().rememberMe()
     	.tokenRepository(persistentTokenRepository())
